@@ -6,11 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using BackEndGamesTito.API.Models;
 // Adicionar um repositório para gerenciar a lógica de dados
-
+using BackEndGamesTito.Repositories;
 using System.Threading.Tasks;
-
 using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
-
+using Microsoft.AspNetCore.Identity.Data;
 // --- ADICIONAR ELEMENTOS PARA CRIPTOGRAFIA --- //
 
 using System.Security.Cryptography;
@@ -21,7 +20,6 @@ using BCrypt.Net; // Biblioteca BCrypt para hashing de senhas
 
 // Usar o banco de dados com o DbUsuario e os atributos de classe Usuario
 using DbUsuario = BackEndGamesTito.API.Data.Models.Usuario;
-using BackEndGamesTito.Repositories;
 
 
 namespace BackEndGamesTito.API.Controllers
@@ -33,7 +31,7 @@ namespace BackEndGamesTito.API.Controllers
     {
         private readonly UsuarioRepository _usuarioRepository;
 
-    ´public AccountController(UsuarioRepository usuarioRepository)
+    public AccountController(UsuarioRepository usuarioRepository)
         {
             _usuarioRepository = usuarioRepository;
         }
@@ -52,7 +50,7 @@ namespace BackEndGamesTito.API.Controllers
                 string ApiKey = "mangaPara_todos_ComLeite_kkk";
 
                 // Cria a senha e email aplicando SHA256
-                string PassSHA256 = ComputeSha256Hash(model.PassWordHash);
+                string PassSHA256 = ComputeSha256Hash(model.PasswordHash);
                 string EmailSHA256 = ComputeSha256Hash(model.Email);
 
 
