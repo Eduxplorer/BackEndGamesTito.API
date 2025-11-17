@@ -15,7 +15,7 @@ namespace BackEndGamesTito.Repositories
         public UsuarioRepository(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? throw new("String de conexão 'DefaultConnection' não encontrada");
+                ?? throw new ArgumentNullException("String de conexão 'DefaultConnection' não encontrada");
         }
 
         public async Task CreateUserAsync(Usuario user)
@@ -67,6 +67,7 @@ namespace BackEndGamesTito.Repositories
                         };
                     }
                 }
+                // Se não encontrar o usuário, retorna 'nulo'
                 return null;
             }
         }
