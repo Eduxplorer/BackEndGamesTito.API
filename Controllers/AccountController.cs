@@ -115,31 +115,31 @@ namespace BackEndGamesTito.API.Controllers
                 });
             }
         }
-          
-        
+
+
         // **** Cria uma instância de SHA256 || MÉTODO DE HASHING DO SHA256 *****
 
-        private string ComputeSha256Hash(string ramData)
-        {
-
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-                // Computa o hash do dado de entrada 'string'
-                // e retorna o resultado como um 'array' de bytes
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(ramData));
-
-                // Converte o 'array' de bytes em uma string hexadecimal
-                StringBuilder builder = new StringBuilder();
-
-                for(int i = 0; i < bytes.Length; i++) 
+        /*        private string ComputeSha256Hash(string ramData)
                 {
-                    builder.Append(bytes[i].ToString("x2"));
+
+                    using (SHA256 sha256Hash = SHA256.Create())
+                    {
+                        // Computa o hash do dado de entrada 'string'
+                        // e retorna o resultado como um 'array' de bytes
+                        byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(ramData));
+
+                        // Converte o 'array' de bytes em uma string hexadecimal
+                        StringBuilder builder = new StringBuilder();
+
+                        for(int i = 0; i < bytes.Length; i++) 
+                        {
+                            builder.Append(bytes[i].ToString("x2"));
+                        }
+                        return builder.ToString();
+                    }
+
                 }
-                return builder.ToString();
-            }
-
-        }
-
+        */
         [HttpPost("login")]
 
         public async Task<IActionResult> Login([FromBody] LoginRequestModel model)
@@ -181,14 +181,65 @@ namespace BackEndGamesTito.API.Controllers
             // Compara o hash recém criado com o hash 
             bool isPasswordValid;
 
-            /*try
+            try
             {
-                isPasswordValid = BCrypt.Net
-            }*/
-            return null;
+                isPasswordValid = BCrypt.Net.BCrypt.Verify(PassCrip, user.PasswordHash);
+            }
+            catch (Exception)
+            {
+                isPasswordValid = false;
+            }
+
+            if (isPasswordValid)
+            {
+                return Unauthorized(new
+                {
+                    erro = true,
+                    message = "Usuário ou senha inválidos."
+                });
+            }
+
+            // 4. SUCESO1 (NO FUTURO GERA UM 'JWT')
+
+            return Ok(new
+            {
+                usuario = new
+                {
+                    email = user.Email,
+                    passwordHash = user.PasswordHash,
+                    NomeCompleto = user.NomeCompleto
+                },
+                erro = false,
+                message = "Login realizado com sucesso!"
+            });
         }
 
+                    /*
+         ********** -- MÉTODO DE HASHING DO SHA356  -- **********
+         ********** -- Cria uma instância de SHA256 -- **********
+         */
+
+        private string ComputeSha256Hash(string rawData)
+        {
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                // Computa o hash do dado de entrada 'string'
+                // e retorna o resultado com um 'array' de bytes
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+
+                // Converte o 'array' de bytes em uma string hexadecimal
+                StringBuilder builder = new StringBuilder();
+
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
     }
 
 
-}
+
+    }
+
