@@ -1,21 +1,21 @@
 ﻿// --- Controllers/AccountController.cs
 
-using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using BackEndGamesTito.API.Models;
 // Adicionar um repositório para gerenciar a lógica de dados
 using BackEndGamesTito.Repositories;
-using System.Threading.Tasks;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
+using BCrypt.Net; // Biblioteca BCrypt para hashing de senhas
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
 // --- ADICIONAR ELEMENTOS PARA CRIPTOGRAFIA --- //
 
 using System.Security.Cryptography;
 using System.Text;
-using BCrypt.Net; // Biblioteca BCrypt para hashing de senhas
-
+using System.Threading.Tasks;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 // Usar o banco de dados
 
 // Usar o banco de dados com o DbUsuario e os atributos de classe Usuario
@@ -140,5 +140,55 @@ namespace BackEndGamesTito.API.Controllers
 
         }
 
+        [HttpPost("login")]
+
+        public async Task<IActionResult> Login([FromBody] LoginRequestModel model)
+        {
+            // 1. Busca o usuário no banco 
+            var user = await _usuarioRepository.GetUserByEmailAsync(model.Email);
+
+            if (user == null)
+            {
+                return Unauthorized(new
+                {
+                    erro = true,
+                    message = "Usuário ou senha inválidos."
+                });
+            }
+
+            // 2. Recria o hash de login exatamente como no registro
+            // *** Criando a criptográfia ***
+            // Palavra passe
+            string ApiKey = "mangaPara_todos_ComLeite_kkk";
+
+            // Cria a senha e email aplicando SHA256
+            string PassSHA256 = ComputeSha256Hash(model.PasswordHash);
+            string EmailSHA256 = ComputeSha256Hash(model.Email);
+
+
+            // Criando a string para a criptografia da senha  e hash(para recuperar senha)
+
+            string PassCrip = PassSHA256 + ApiKey;
+            // string HashCrip = EmailSHA256 + PassSHA256 + dataString + ApiKey;
+
+            // Aplicando o BCrypt
+
+            //string PassBCrypt = BCrypt.Net.BCrypt.HashPassword(PassCrip);
+            // string HashBCrypt = BCrypt.Net.BCrypt.HashPassword(HashCrip);
+
+
+            // 3. Verifica o hash usanto o Bcrypt
+            // Compara o hash recém criado com o hash 
+            bool isPasswordValid;
+
+            /*try
+            {
+                isPasswordValid = BCrypt.Net
+            }*/
+            return null;
+        }
+
     }
+
+
 }

@@ -27,7 +27,7 @@ namespace BackEndGamesTito.Repositories
 
                 using (var command = new SqlCommand(commandText, connection)) {
                     command.Parameters.AddWithValue("@NomeCompleto", user.NomeCompleto);
-                    command.Parameters.AddWithValue("Email", user.Email);
+                    command.Parameters.AddWithValue("@Email", user.Email);
                     command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
                     command.Parameters.AddWithValue("@HashPass", user.HashPass);
                     // Está linha da 'DataAtualizacao' entrada como objeto podendo ser um valor 'nulo'
