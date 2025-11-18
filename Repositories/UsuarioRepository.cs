@@ -6,7 +6,7 @@ using System;
 using System.Reflection.PortableExecutable;
 using System.Threading.Tasks;
 
-namespace BackEndGamesTito.Repositories
+namespace BackEndGamesTito.API.Repositories
 {
     public class UsuarioRepository
     {
@@ -23,7 +23,7 @@ namespace BackEndGamesTito.Repositories
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var commandText = @"INSERT INTO dbo.Usuario (NomeCompleto, Email, PasswordHash, HashPass, DataAtualizacao, StatusId) VALUES @NomeCompleto, @Email, @PasswordHash, @HashPass, @DataAtualizacao, @StatusId";
+                var commandText = @"INSERT INTO dbo.Usuario (NomeCompleto, Email, PassWordHash, HashPass, DataAtualizacao, StatusId) VALUES (@NomeCompleto, @Email, @PasswordHash, @HashPass, @DataAtualizacao, @StatusId)";
 
                 using (var command = new SqlCommand(commandText, connection)) {
                     command.Parameters.AddWithValue("@NomeCompleto", user.NomeCompleto);
@@ -47,6 +47,9 @@ namespace BackEndGamesTito.Repositories
                 var commandText = @"SELECT TOP 1 * FROM dbo.Usuario WHERE Email = @Email";
 
                 using ( var command = new SqlCommand(commandText, connection))
+                {
+
+                    command.Parameters.AddWithValue("@Email", email);
 
                 using (var reader = await command.ExecuteReaderAsync())
                 {
@@ -66,6 +69,7 @@ namespace BackEndGamesTito.Repositories
                             StatusId = reader.GetInt32(reader.GetOrdinal("StatusId"))
                         };
                     }
+                }
                 }
                 // Se não encontrar o usuário, retorna 'nulo'
                 return null;

@@ -2,7 +2,7 @@
 
 using BackEndGamesTito.API.Models;
 // Adicionar um repositório para gerenciar a lógica de dados
-using BackEndGamesTito.Repositories;
+using BackEndGamesTito.API.Repositories;
 using BCrypt.Net; // Biblioteca BCrypt para hashing de senhas
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
@@ -16,7 +16,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
-// Usar o banco de dados
+
 
 // Usar o banco de dados com o DbUsuario e os atributos de classe Usuario
 using DbUsuario = BackEndGamesTito.API.Data.Models.Usuario;
@@ -56,7 +56,7 @@ namespace BackEndGamesTito.API.Controllers
 
                 // Criando a string para a criptografia da senha  e hash(para recuperar senha)
 
-                string PassCrip = PassSHA256 + ApiKey;
+                string PassCrip = PassSHA256 + EmailSHA256 + ApiKey;
                 string HashCrip = EmailSHA256 + PassSHA256 + dataString + ApiKey;
 
                 // Aplicando o BCrypt
@@ -81,7 +81,7 @@ namespace BackEndGamesTito.API.Controllers
                 return Ok(
                     new
                     {
-                        erro = false, // success = false
+                        erro = false, // success = true
                         message = "Usuario cadastrado com sucesso!",
                         usuario = new
                         {
@@ -159,6 +159,8 @@ namespace BackEndGamesTito.API.Controllers
             // 2. Recria o hash de login exatamente como no registro
             // *** Criando a criptográfia ***
             // Palavra passe
+            
+            // Palavra passe
             string ApiKey = "mangaPara_todos_ComLeite_kkk";
 
             // Cria a senha e email aplicando SHA256
@@ -168,14 +170,7 @@ namespace BackEndGamesTito.API.Controllers
 
             // Criando a string para a criptografia da senha  e hash(para recuperar senha)
 
-            string PassCrip = PassSHA256 + ApiKey;
-            // string HashCrip = EmailSHA256 + PassSHA256 + dataString + ApiKey;
-
-            // Aplicando o BCrypt
-
-            //string PassBCrypt = BCrypt.Net.BCrypt.HashPassword(PassCrip);
-            // string HashBCrypt = BCrypt.Net.BCrypt.HashPassword(HashCrip);
-
+            string PassCrip = PassSHA256 + EmailSHA256 + ApiKey;
 
             // 3. Verifica o hash usanto o Bcrypt
             // Compara o hash recém criado com o hash 
@@ -190,7 +185,7 @@ namespace BackEndGamesTito.API.Controllers
                 isPasswordValid = false;
             }
 
-            if (isPasswordValid)
+            if (!isPasswordValid)
             {
                 return Unauthorized(new
                 {
@@ -205,9 +200,8 @@ namespace BackEndGamesTito.API.Controllers
             {
                 usuario = new
                 {
-                    email = user.Email,
-                    passwordHash = user.PasswordHash,
-                    NomeCompleto = user.NomeCompleto
+                    usuarioId = user.UsuarioId,
+                    statusId = user.StatusId,
                 },
                 erro = false,
                 message = "Login realizado com sucesso!"
