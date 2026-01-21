@@ -1,5 +1,6 @@
 
 using BackEndGamesTito.API.Repositories;
+using BackEndGamesTito.API.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<UsuarioRepository>();
+
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 

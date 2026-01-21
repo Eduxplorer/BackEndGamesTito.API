@@ -75,5 +75,74 @@ namespace BackEndGamesTito.API.Repositories
                 return null;
             }
         }
+
+
+
+        // Método para salvar o token de recuperação (Simulando o envio)
+        public async Task SaveResetTokenAsync(string email, string token)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                // O token vale por 15 minutos
+                var commandText = @"UPDATE dbo.Usuario 
+                            SET ResetToken = @Token, 
+                                ResetTokenExpiry = DATEADD(minute, 15, GETDATE()) 
+                            WHERE Email = @Email";
+
+                using (var command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("@Token", token);
+                    command.Parameters.AddWithValue("@Email", email);
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+        }
+
+        // Método que valida o token e ATUALIZA a senha
+        public async Task<bool> UpdatePasswordWithTokenAsync(string email, string token, string newPasswordHash, string newHashPass)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                // Verifica se o email e o token batem E se o token ainda não expirou
+                var checkTokenQuery = @"SELECT Count(1) FROM dbo.Usuario 
+                                WHERE Email = @Email 
+                                AND ResetToken = @Token 
+                                AND ResetTokenExpiry > GETDATE()";
+
+                using (var checkCmd = new SqlCommand(checkTokenQuery, connection))
+                {
+                    checkCmd.Parameters.AddWithValue("@Email", email);
+                    checkCmd.Parameters.AddWithValue("@Token", token);
+
+                    int exists = (int)await checkCmd.ExecuteScalarAsync();
+
+                    if (exists == 0) return false; // Token inválido ou expirado
+                }
+
+                // Se o token é válido, atualiza a senha e limpa o token usado
+                var updateQuery = @"UPDATE dbo.Usuario 
+                            SET PasswordHash = @PasswordHash, 
+                                HashPass = @HashPass, 
+                                ResetToken = NULL, 
+                                ResetTokenExpiry = NULL,
+                                DataAtualizacao = GETDATE()
+                            WHERE Email = @Email";
+
+                using (var updateCmd = new SqlCommand(updateQuery, connection))
+                {
+                    updateCmd.Parameters.AddWithValue("@PasswordHash", newPasswordHash);
+                    updateCmd.Parameters.AddWithValue("@HashPass", newHashPass);
+                    updateCmd.Parameters.AddWithValue("@Email", email);
+
+                    await updateCmd.ExecuteNonQueryAsync();
+                    return true;
+                }
+            }
+        }
     }
+
+
 }

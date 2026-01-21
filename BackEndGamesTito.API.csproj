@@ -4,11 +4,13 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>14e97ea6-f9b2-44fe-b84c-d37fa1c1c008</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.17.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="MailKit" Version="4.14.1" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.23.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" /> 
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.17" />

@@ -1,6 +1,7 @@
 ﻿// --- Controllers/AccountController.cs
 
 using BackEndGamesTito.API.Models;
+using BackEndGamesTito.API.Service;
 // Adicionar um repositório para gerenciar a lógica de dados
 using BackEndGamesTito.API.Repositories;
 using BCrypt.Net; // Biblioteca BCrypt para hashing de senhas
@@ -30,10 +31,12 @@ namespace BackEndGamesTito.API.Controllers
     public class AccountController : ControllerBase 
     {
         private readonly UsuarioRepository _usuarioRepository;
+        private readonly EmailService _emailService; // Adicione aqui
 
-    public AccountController(UsuarioRepository usuarioRepository)
+        public AccountController(UsuarioRepository usuarioRepository, EmailService emailService)
         {
             _usuarioRepository = usuarioRepository;
+            _emailService = emailService; // Injete aqui
         }
 
         [HttpPost("register")]
@@ -229,6 +232,92 @@ namespace BackEndGamesTito.API.Controllers
                     builder.Append(bytes[i].ToString("x2"));
                 }
                 return builder.ToString();
+            }
+        }
+
+
+
+        // 1. Endpoint para pedir a recuperação (Gera o Token)
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] string email)
+        {
+            var user = await _usuarioRepository.GetUserByEmailAsync(email);
+
+
+            // Dica de segurança: Mesmo se o usuário não existir, retornamos OK
+            // para não revelar quem é cliente e quem não é.
+            if (user == null)
+            {
+                // Por segurança, não avisamos se o e-mail não existe (evita varredura de usuários)
+                return Ok(new { message = "Se o e-mail existir, um código foi enviado." });
+            }
+
+            // Gera um código simples de 6 dígitos (ou um GUID)
+            string token = new Random().Next(100000, 999999).ToString();
+
+            // Salva no banco
+            await _usuarioRepository.SaveResetTokenAsync(email, token);
+
+            // AQUI VOCÊ ENVIARIA O E-MAIL DE VERDADE
+
+            // --- A MÁGICA ACONTECE AQUI: ENVIO DO E-MAIL ---
+
+            string assunto = "Recuperação de Senha - GamesTito";
+            string mensagem = $@"
+            <h3>Olá, {user.NomeCompleto}!</h3>
+            <p>Você solicitou a troca de senha.</p>
+            <p>Seu código de segurança é: <strong>{token}</strong></p>
+            <p>Este código expira em 15 minutos.</p>
+            <p>Se não foi você, ignore este e-mail.</p>";
+
+            try
+            {
+                await _emailService.SendEmailAsync(email, assunto, mensagem);
+                return Ok(new { message = "E-mail de recuperação enviado com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                // Logar o erro aqui seria o ideal
+                return StatusCode(500, new { message = "Erro ao enviar e-mail. Tente novamente." });
+            }
+        }
+
+        // 2. Endpoint para efetivar a troca
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestModel model)
+        {
+            try
+            {
+                // --- REPLICANDO A SUA LÓGICA DE CRIPTOGRAFIA (Importante ser igual ao Register) ---
+
+                DateTime agora = DateTime.Now;
+                string dataString = agora.ToString();
+                string ApiKey = "mangaPara_todos_ComLeite_kkk"; // Cuidado com Hardcode!
+
+                string PassSHA256 = ComputeSha256Hash(model.NewPassword);
+                string EmailSHA256 = ComputeSha256Hash(model.Email);
+
+                string PassCrip = PassSHA256 + EmailSHA256 + ApiKey;
+                string HashCrip = EmailSHA256 + PassSHA256 + dataString + ApiKey;
+
+                string PassBCrypt = BCrypt.Net.BCrypt.HashPassword(PassCrip);
+                string HashBCrypt = BCrypt.Net.BCrypt.HashPassword(HashCrip);
+
+                // --- FIM DA CRIPTOGRAFIA ---
+
+                // Chama o repositório para validar o token e atualizar
+                bool sucesso = await _usuarioRepository.UpdatePasswordWithTokenAsync(model.Email, model.Token, PassBCrypt, HashBCrypt);
+
+                if (!sucesso)
+                {
+                    return BadRequest(new { erro = true, message = "Token inválido ou expirado." });
+                }
+
+                return Ok(new { erro = false, message = "Senha atualizada com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { erro = true, message = "Erro ao atualizar senha.", detalhe = ex.Message });
             }
         }
     }
