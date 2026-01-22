@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-
 namespace BackEndGamesTito.API.Models
 {
     public class RegisterRequestModel
@@ -14,5 +13,9 @@ namespace BackEndGamesTito.API.Models
 
         [Required(ErrorMessage = "O campo Senha é obrigatório!")]
         public string PasswordHash { get; set; } = string.Empty;
+
+    
+        [Phone(ErrorMessage = "Formato de telefone inválido")]
+        public string? Telefone { get; set; } // Pode ser opcional ou obrigatório, depende da regra de negócio
     }
 }

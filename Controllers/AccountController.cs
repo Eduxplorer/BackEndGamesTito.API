@@ -27,16 +27,18 @@ namespace BackEndGamesTito.API.Controllers
 {
     // Criando as rotas para o controller da conta
     [ApiController]
-    [Route("api/[controller]")] // controle de rotas é o meu próprio endpoint
+    [Route("api/[controller]")] // controle de rotas é o próprio endpoint
     public class AccountController : ControllerBase 
     {
         private readonly UsuarioRepository _usuarioRepository;
-        private readonly EmailService _emailService; // Adicione aqui
+        private readonly EmailService _emailService; 
+        private readonly SmsService _smsService; 
 
-        public AccountController(UsuarioRepository usuarioRepository, EmailService emailService)
+        public AccountController(UsuarioRepository usuarioRepository, EmailService emailService, SmsService smsService)
         {
             _usuarioRepository = usuarioRepository;
-            _emailService = emailService; // Injete aqui
+            _emailService = emailService;
+            _smsService = smsService;
         }
 
         [HttpPost("register")]
@@ -76,7 +78,8 @@ namespace BackEndGamesTito.API.Controllers
                     PasswordHash = PassBCrypt,
                     HashPass = HashBCrypt,
                     DataAtualizacao = DateTime.Now,
-                    StatusId = 2
+                    StatusId = 2,
+                    Telefone = model.Telefone
                 };
 
                 await _usuarioRepository.CreateUserAsync(novoUsuario);
@@ -148,7 +151,7 @@ namespace BackEndGamesTito.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequestModel model)
         {
             // 1. Busca o usuário no banco 
-            var user = await _usuarioRepository.GetUserByEmailAsync(model.Email);
+            var user = await _usuarioRepository.GetUserByEmailAsync(model.Email, model.Telefone);
 
             if (user == null)
             {
@@ -318,6 +321,42 @@ namespace BackEndGamesTito.API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { erro = true, message = "Erro ao atualizar senha.", detalhe = ex.Message });
+            }
+        }
+
+
+        [HttpPost("forgot-password-sms")]
+        public async Task<IActionResult> ForgotPasswordSms([FromBody] string telefone)
+        {
+            // 1. Busca o usuário pelo TELEFONE informado
+            // O repositório vai procurar: Quem tem o número "+5511..."?
+            var user = await _usuarioRepository.GetUserByPhoneAsync(telefone);
+
+            if (user == null)
+            {
+                return BadRequest(new { message = "Telefone não encontrado em nossa base de dados." });
+            }
+
+            // 2. Gera Token
+            string token = new Random().Next(100000, 999999).ToString();
+
+            // 3. Salva o Token no banco
+            // IMPORTANTE: Nosso método SaveResetTokenAsync usa o EMAIL para achar a linha no banco.
+            // Como buscamos o usuário completo no passo 1, temos o email dele aqui: user.Email
+            await _usuarioRepository.SaveResetTokenAsync(user.Email, token);
+
+            // 4. Envia SMS
+            string mensagem = $"GAMES TITO: Seu codigo de recuperacao e: {token}. Valido por 15 min.";
+
+            try
+            {
+                // Envia para o telefone que ele digitou (que é o mesmo que está no banco)
+                await _smsService.SendSmsAsync(user.Telefone, mensagem);
+                return Ok(new { message = "SMS enviado com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro no envio de SMS.", detalhe = ex.Message });
             }
         }
     }

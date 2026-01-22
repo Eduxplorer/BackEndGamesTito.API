@@ -33,24 +33,24 @@ namespace BackEndGamesTito.API.Repositories
                     // Está linha da 'DataAtualizacao' entrada como objeto podendo ser um valor 'nulo'
                     command.Parameters.AddWithValue("@DataAtualizacao", (object)user.DataAtualizacao ?? DBNull.Value);
                     command.Parameters.AddWithValue("@StatusId", user.StatusId);
-
+                    command.Parameters.AddWithValue("@Telefone", (object)user.Telefone ?? DBNull.Value);
                     await command.ExecuteNonQueryAsync();
                 }
             }
         }
 
-        public async Task<Usuario?> GetUserByEmailAsync(string email)
+        public async Task<Usuario?> GetUserByEmailAsync(string email, string telefone = null)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var commandText = @"SELECT TOP 1 * FROM dbo.Usuario WHERE Email = @Email";
+                var commandText = @"SELECT TOP 1 * FROM dbo.Usuario WHERE Email = @Email OR Telefone = @Telefone";
 
                 using ( var command = new SqlCommand(commandText, connection))
                 {
 
                     command.Parameters.AddWithValue("@Email", email);
-
+                    command.Parameters.AddWithValue("@Telefone", telefone);
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     if (await reader.ReadAsync())
@@ -63,10 +63,29 @@ namespace BackEndGamesTito.API.Repositories
                             PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
                             HashPass = reader.GetString(reader.GetOrdinal("HashPass")),
                             DataCriacao = reader.GetDateTime(reader.GetOrdinal("DataCriacao")),
+
+                            // Mapeamento de DataAtualizacao (Nullable)
                             DataAtualizacao = reader.IsDBNull(reader.GetOrdinal("DataAtualizacao"))
-                            ? null
-                            : reader.GetDateTime(reader.GetOrdinal("DataAtualizacao")),
-                            StatusId = reader.GetInt32(reader.GetOrdinal("StatusId"))
+                                    ? null
+                                    : reader.GetDateTime(reader.GetOrdinal("DataAtualizacao")),
+
+                            StatusId = reader.GetInt32(reader.GetOrdinal("StatusId")),
+
+       
+                            // Como é string, verificamos se é nulo. Se não for, pegamos a string.
+                            Telefone = reader.IsDBNull(reader.GetOrdinal("Telefone"))
+                                    ? null
+                                    : reader.GetString(reader.GetOrdinal("Telefone")),
+
+                            // Dica Sênior: Já que estamos aqui, vamos mapear o Token também
+                            // Caso você precise debugar ou validar algo no futuro
+                            ResetToken = reader.IsDBNull(reader.GetOrdinal("ResetToken"))
+                                    ? null
+                                    : reader.GetString(reader.GetOrdinal("ResetToken")),
+
+                            ResetTokenExpiry = reader.IsDBNull(reader.GetOrdinal("ResetTokenExpiry"))
+                                    ? null
+                                    : reader.GetDateTime(reader.GetOrdinal("ResetTokenExpiry"))
                         };
                     }
                 }
@@ -76,6 +95,56 @@ namespace BackEndGamesTito.API.Repositories
             }
         }
 
+        // Novo método: Busca usuário pelo telefone exato
+        public async Task<Usuario?> GetUserByPhoneAsync(string telefone)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                // Mudamos o WHERE para filtrar por Telefone
+                var commandText = @"SELECT TOP 1 * FROM dbo.Usuario WHERE Telefone = @Telefone";
+
+                using (var command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("@Telefone", telefone);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            return new Usuario
+                            {
+                                UsuarioId = reader.GetInt32(reader.GetOrdinal("UsuarioId")),
+                                NomeCompleto = reader.GetString(reader.GetOrdinal("NomeCompleto")),
+                                Email = reader.GetString(reader.GetOrdinal("Email")), // Importante pegar o e-mail!
+                                PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
+                                HashPass = reader.GetString(reader.GetOrdinal("HashPass")),
+                                DataCriacao = reader.GetDateTime(reader.GetOrdinal("DataCriacao")),
+
+                                DataAtualizacao = reader.IsDBNull(reader.GetOrdinal("DataAtualizacao"))
+                                    ? null
+                                    : reader.GetDateTime(reader.GetOrdinal("DataAtualizacao")),
+
+                                StatusId = reader.GetInt32(reader.GetOrdinal("StatusId")),
+
+                                Telefone = reader.IsDBNull(reader.GetOrdinal("Telefone"))
+                                    ? null
+                                    : reader.GetString(reader.GetOrdinal("Telefone")),
+
+                                ResetToken = reader.IsDBNull(reader.GetOrdinal("ResetToken"))
+                                    ? null
+                                    : reader.GetString(reader.GetOrdinal("ResetToken")),
+
+                                ResetTokenExpiry = reader.IsDBNull(reader.GetOrdinal("ResetTokenExpiry"))
+                                    ? null
+                                    : reader.GetDateTime(reader.GetOrdinal("ResetTokenExpiry"))
+                            };
+                        }
+                    }
+                }
+                return null;
+            }
+        }
 
 
         // Método para salvar o token de recuperação (Simulando o envio)

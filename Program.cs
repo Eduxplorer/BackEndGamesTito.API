@@ -12,6 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UsuarioRepository>();
 
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<SmsService>(); 
 
 var app = builder.Build();
 
