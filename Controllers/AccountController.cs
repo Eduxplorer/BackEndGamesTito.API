@@ -151,7 +151,7 @@ namespace BackEndGamesTito.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequestModel model)
         {
             // 1. Busca o usuário no banco 
-            var user = await _usuarioRepository.GetUserByEmailAsync(model.Email, model.Telefone);
+            var user = await _usuarioRepository.GetUserByEmailAsync(model.Email);
 
             if (user == null)
             {

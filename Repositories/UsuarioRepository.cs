@@ -39,18 +39,17 @@ namespace BackEndGamesTito.API.Repositories
             }
         }
 
-        public async Task<Usuario?> GetUserByEmailAsync(string email, string telefone = null)
+        public async Task<Usuario?> GetUserByEmailAsync(string email)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var commandText = @"SELECT TOP 1 * FROM dbo.Usuario WHERE Email = @Email OR Telefone = @Telefone";
+                var commandText = @"SELECT TOP 1 * FROM dbo.Usuario WHERE Email = @Email";
 
                 using ( var command = new SqlCommand(commandText, connection))
                 {
 
                     command.Parameters.AddWithValue("@Email", email);
-                    command.Parameters.AddWithValue("@Telefone", telefone);
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     if (await reader.ReadAsync())
