@@ -150,8 +150,12 @@ namespace BackEndGamesTito.API.Controllers
 
         public async Task<IActionResult> Login([FromBody] LoginRequestModel model)
         {
-            // 1. Busca o usuário no banco 
-            var user = await _usuarioRepository.GetUserByEmailAsync(model.Email);
+            // 1. Busca o usuário no banco pelo email OU telefone
+            var user = !string.IsNullOrWhiteSpace(model.Email)
+                ? await _usuarioRepository.GetUserByEmailAsync(model.Email!)
+                : !string.IsNullOrWhiteSpace(model.Telefone)
+                    ? await _usuarioRepository.GetUserByPhoneAsync(model.Telefone!)
+                    : null;
 
             if (user == null)
             {
@@ -163,23 +167,18 @@ namespace BackEndGamesTito.API.Controllers
             }
 
             // 2. Recria o hash de login exatamente como no registro
-            // *** Criando a criptográfia ***
-            // Palavra passe
-            
-            // Palavra passe
             string ApiKey = "mangaPara_todos_ComLeite_kkk";
 
-            // Cria a senha e email aplicando SHA256
+            // Cria a senha aplicando SHA256
             string PassSHA256 = ComputeSha256Hash(model.PasswordHash);
-            string EmailSHA256 = ComputeSha256Hash(model.Email);
 
+            // Importante: usar o e-mail que está salvo no banco (user.Email)
+            string EmailSHA256 = ComputeSha256Hash(user.Email ?? string.Empty);
 
             // Criando a string para a criptografia da senha  e hash(para recuperar senha)
-
             string PassCrip = PassSHA256 + EmailSHA256 + ApiKey;
 
-            // 3. Verifica o hash usanto o Bcrypt
-            // Compara o hash recém criado com o hash 
+            // 3. Verifica o hash usando o Bcrypt
             bool isPasswordValid;
 
             try
@@ -200,8 +199,7 @@ namespace BackEndGamesTito.API.Controllers
                 });
             }
 
-            // 4. SUCESO1 (NO FUTURO GERA UM 'JWT')
-
+            // 4. SUCESSO (NO FUTURO GERA UM 'JWT')
             return Ok(new
             {
                 usuario = new

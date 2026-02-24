@@ -4,21 +4,30 @@
 // como requisição meu cliente tem que fornecer o email e a senha para minha api preparar 
 
 using System.ComponentModel.DataAnnotations; // Objeto nativo do C# para validação de dados por isso não precisamos colocar parentses na chamada do método ComponentModel.DataAnnotations
+using System.Collections.Generic;
 
 namespace BackEndGamesTito.API.Models
 {
-    public class LoginRequestModel
+    public class LoginRequestModel : IValidatableObject
     {
-        [Required(ErrorMessage = "O campo email é obrigatório.")] // O required faz o campo ter que ser obrigatório e o erroemessage define uma mensagem para caso o dado não seja fornecido
-        [EmailAddress(ErrorMessage = "O Email informado não pe válido.")] // Verifica se o Email é válido e define uma mensagem de erro caso não seja válido
-        public string Email { get; set; } = string.Empty;
+        // Email não é obrigatório por si só: o usuário pode enviar email OU telefone
+        [EmailAddress(ErrorMessage = "O Email informado não é válido.")]
+        public string? Email { get; set; }
 
         [Phone(ErrorMessage = "Formato de telefone inválido")]
         public string? Telefone { get; set; }
 
         [Required(ErrorMessage = "O campo senha é obrigatório.")]
-        public string PasswordHash { get; set; } = string.Empty; // Por questões de segurança preiso pedir o email e a senha do usuário para a requisição
+        public string PasswordHash { get; set; } = string.Empty; // Por questões de segurança preciso pedir a senha do usuário para a requisição
 
+        // Validação customizada: exigir pelo menos Email ou Telefone
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (string.IsNullOrWhiteSpace(Email) && string.IsNullOrWhiteSpace(Telefone))
+            {
+                yield return new ValidationResult("Informe o email ou o telefone.", new[] { nameof(Email), nameof(Telefone) });
+            }
+        }
     }
 }
 
