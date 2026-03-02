@@ -103,9 +103,8 @@ CREATE TABLE dbo.Usuarios (
     PasswordHash VARCHAR(60) NOT NULL, -- Tamanho exato para BCrypt
     ResetToken VARCHAR(100) NULL,
     ResetTokenExpiry DATETIME2 NULL,
-    DataCriacao DATETIME2 DEFAULT SYSUTCDATETIME()
+    DataCriacao DATETIME2 DEFAULT SYSUTCDATETIME(),
     StatusId INT DEFAULT 1
-);
 );
 
 ```
