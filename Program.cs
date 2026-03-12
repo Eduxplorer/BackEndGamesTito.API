@@ -23,6 +23,9 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<UsuarioRepository>();
 
+// Registrar repositório de jogos para injeção de dependência
+builder.Services.AddScoped<JogosRepository>();
+
 
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<SmsService>(); 

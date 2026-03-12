@@ -1,0 +1,72 @@
+﻿using BackEndGamesTito.API.Data.Models;
+using Microsoft.Data.SqlClient;
+
+namespace BackEndGamesTito.API.Repositories
+{
+    public class JogosRepository
+    {
+        private readonly string _connectionString = string.Empty;
+
+        public JogosRepository(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new ArgumentNullException("String de conexão 'DefaultConnection' não encontrada");
+        }
+        public async Task<Jogos?> searchGame()
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                var commandText = @"SELECT TOP 1 * FROM Jogos";
+
+                using (var command = new SqlCommand(commandText, connection))
+                {
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            return new Jogos
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Nome = reader.IsDBNull(reader.GetOrdinal("Nome")) ? string.Empty : reader.GetString(reader.GetOrdinal("Nome")),
+                                Descricao = reader.IsDBNull(reader.GetOrdinal("Descricao")) ? string.Empty : reader.GetString(reader.GetOrdinal("Descricao")),
+                                Preco = reader.IsDBNull(reader.GetOrdinal("Preco")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Preco"))),
+                                Lancamento = reader.IsDBNull(reader.GetOrdinal("Lancamento")) ? DateTime.MinValue : Convert.ToDateTime(reader.GetValue(reader.GetOrdinal("Lancamento")))
+                            };
+                        }
+                    }
+                }
+                return null;
+            }
+        }
+
+        public async Task<List<Jogos>> GetAllGames()
+        {
+            var games = new List<Jogos>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                var commandText = @"SELECT * FROM Jogos";
+                using (var command = new SqlCommand(commandText, connection))
+                {
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            games.Add(new Jogos
+                            {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    Nome = reader.IsDBNull(reader.GetOrdinal("Nome")) ? string.Empty : reader.GetString(reader.GetOrdinal("Nome")),
+                                    Descricao = reader.IsDBNull(reader.GetOrdinal("Descricao")) ? string.Empty : reader.GetString(reader.GetOrdinal("Descricao")),
+                                    Preco = reader.IsDBNull(reader.GetOrdinal("Preco")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Preco"))),
+                                    Avaliacao = reader.IsDBNull(reader.GetOrdinal("Avaliacao")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Avaliacao"))),
+                                    Lancamento = reader.IsDBNull(reader.GetOrdinal("Lancamento")) ? DateTime.MinValue : Convert.ToDateTime(reader.GetValue(reader.GetOrdinal("Lancamento")))
+                            });
+                        }
+                    }
+                }
+            }
+            return games;
+        }
+    }
+}

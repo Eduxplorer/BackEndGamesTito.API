@@ -25,7 +25,8 @@ namespace BackEndGamesTito.API.Repositories
                 await connection.OpenAsync();
                 var commandText = @"INSERT INTO dbo.Usuario (NomeCompleto, Email, PassWordHash, HashPass, DataAtualizacao, StatusId) VALUES (@NomeCompleto, @Email, @PasswordHash, @HashPass, @DataAtualizacao, @StatusId)";
 
-                using (var command = new SqlCommand(commandText, connection)) {
+                using (var command = new SqlCommand(commandText, connection))
+                {
                     command.Parameters.AddWithValue("@NomeCompleto", user.NomeCompleto);
                     command.Parameters.AddWithValue("@Email", user.Email);
                     command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
@@ -46,48 +47,48 @@ namespace BackEndGamesTito.API.Repositories
                 await connection.OpenAsync();
                 var commandText = @"SELECT TOP 1 * FROM dbo.Usuario WHERE Email = @Email";
 
-                using ( var command = new SqlCommand(commandText, connection))
+                using (var command = new SqlCommand(commandText, connection))
                 {
 
                     command.Parameters.AddWithValue("@Email", email);
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    if (await reader.ReadAsync())
+                    using (var reader = await command.ExecuteReaderAsync())
                     {
-                        return new Usuario
+                        if (await reader.ReadAsync())
                         {
-                            UsuarioId = reader.GetInt32(reader.GetOrdinal("UsuarioId")),
-                            NomeCompleto = reader.GetString(reader.GetOrdinal("NomeCompleto")),
-                            Email = reader.GetString(reader.GetOrdinal("Email")),
-                            PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
-                            HashPass = reader.GetString(reader.GetOrdinal("HashPass")),
-                            DataCriacao = reader.GetDateTime(reader.GetOrdinal("DataCriacao")),
+                            return new Usuario
+                            {
+                                UsuarioId = reader.GetInt32(reader.GetOrdinal("UsuarioId")),
+                                NomeCompleto = reader.GetString(reader.GetOrdinal("NomeCompleto")),
+                                Email = reader.GetString(reader.GetOrdinal("Email")),
+                                PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
+                                HashPass = reader.GetString(reader.GetOrdinal("HashPass")),
+                                DataCriacao = reader.GetDateTime(reader.GetOrdinal("DataCriacao")),
 
-                            // Mapeamento de DataAtualizacao (Nullable)
-                            DataAtualizacao = reader.IsDBNull(reader.GetOrdinal("DataAtualizacao"))
-                                    ? null
-                                    : reader.GetDateTime(reader.GetOrdinal("DataAtualizacao")),
+                                // Mapeamento de DataAtualizacao (Nullable)
+                                DataAtualizacao = reader.IsDBNull(reader.GetOrdinal("DataAtualizacao"))
+                                        ? null
+                                        : reader.GetDateTime(reader.GetOrdinal("DataAtualizacao")),
 
-                            StatusId = reader.GetInt32(reader.GetOrdinal("StatusId")),
+                                StatusId = reader.GetInt32(reader.GetOrdinal("StatusId")),
 
-       
-                            // Como é string, verificamos se é nulo. Se não for, pegamos a string.
-                            Telefone = reader.IsDBNull(reader.GetOrdinal("Telefone"))
-                                    ? null
-                                    : reader.GetString(reader.GetOrdinal("Telefone")),
 
-                            // Dica Sênior: Já que estamos aqui, vamos mapear o Token também
-                            // Caso você precise debugar ou validar algo no futuro
-                            ResetToken = reader.IsDBNull(reader.GetOrdinal("ResetToken"))
-                                    ? null
-                                    : reader.GetString(reader.GetOrdinal("ResetToken")),
+                                // Como é string, verificamos se é nulo. Se não for, pegamos a string.
+                                Telefone = reader.IsDBNull(reader.GetOrdinal("Telefone"))
+                                        ? null
+                                        : reader.GetString(reader.GetOrdinal("Telefone")),
 
-                            ResetTokenExpiry = reader.IsDBNull(reader.GetOrdinal("ResetTokenExpiry"))
-                                    ? null
-                                    : reader.GetDateTime(reader.GetOrdinal("ResetTokenExpiry"))
-                        };
+                                // Dica Sênior: Já que estamos aqui, vamos mapear o Token também
+                                // Caso você precise debugar ou validar algo no futuro
+                                ResetToken = reader.IsDBNull(reader.GetOrdinal("ResetToken"))
+                                        ? null
+                                        : reader.GetString(reader.GetOrdinal("ResetToken")),
+
+                                ResetTokenExpiry = reader.IsDBNull(reader.GetOrdinal("ResetTokenExpiry"))
+                                        ? null
+                                        : reader.GetDateTime(reader.GetOrdinal("ResetTokenExpiry"))
+                            };
+                        }
                     }
-                }
                 }
                 // Se não encontrar o usuário, retorna 'nulo'
                 return null;
@@ -210,7 +211,9 @@ namespace BackEndGamesTito.API.Repositories
                 }
             }
         }
+
+
+
+
     }
-
-
 }
