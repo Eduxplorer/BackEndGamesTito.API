@@ -1,6 +1,7 @@
 ﻿// --- Controllers/AccountController.cs
 
 using BackEndGamesTito.API.Data.Models;
+using BackEndGamesTito.API.Models;
 using BackEndGamesTito.API.Service;
 // Adicionar um repositório para gerenciar a lógica de dados
 using BackEndGamesTito.API.Repositories;
@@ -17,6 +18,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
+using BackEndGamesTito.API.Models;
 
 
 namespace BackEndGamesTito.API.Controllers
@@ -32,11 +34,15 @@ namespace BackEndGamesTito.API.Controllers
             _jogosRepository = jogosRepository;
         }
         [HttpGet("game")]
-        public async Task<ActionResult<Jogos>> SearchGame()
+        public async Task<ActionResult<Jogos>> SearchGame([FromQuery(Name = "nome")] string? nome)
         {
             try
             {
-                var game = await _jogosRepository.searchGame();
+                if (string.IsNullOrWhiteSpace(nome))
+                {
+                    return BadRequest(new { message = "O parâmetro 'nome' é obrigatório na query string. Ex.: /api/games/game?nome=NomeDoJogo" });
+                }
+                var game = await _jogosRepository.searchGame(nome);
                 if (game == null)
                 {
                     return NotFound(new { message = "Nenhum jogo encontrado." });

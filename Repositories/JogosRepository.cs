@@ -12,15 +12,16 @@ namespace BackEndGamesTito.API.Repositories
             _connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new ArgumentNullException("String de conexão 'DefaultConnection' não encontrada");
         }
-        public async Task<Jogos?> searchGame()
+        public async Task<Jogos?> searchGame(string nome)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var commandText = @"SELECT TOP 1 * FROM Jogos";
+                var commandText = @"SELECT TOP 1 * FROM Jogos WHERE nome = @nome";
 
                 using (var command = new SqlCommand(commandText, connection))
                 {
+                    command.Parameters.AddWithValue("@nome", nome);
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         if (await reader.ReadAsync())
