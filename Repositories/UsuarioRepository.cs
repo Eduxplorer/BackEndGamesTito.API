@@ -45,7 +45,7 @@ namespace BackEndGamesTito.API.Repositories
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var commandText = @"SELECT TOP 1 * FROM dbo.Usuario WHERE Email = @Email";
+                var commandText = @"SELECT TOP 1 UsuarioId, NomeCompleto, Email, PasswordHash, HashPass, DataCriacao, DataAtualizacao, StatusId, Telefone, ResetToken, ResetTokenExpiry FROM dbo.Usuario WHERE Email = @Email";
 
                 using (var command = new SqlCommand(commandText, connection))
                 {

@@ -17,7 +17,7 @@ namespace BackEndGamesTito.API.Repositories
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var commandText = @"SELECT TOP 1 * FROM Jogos WHERE nome = @nome";
+                var commandText = @"SELECT TOP 1 * FROM Jogos WHERE nome LIKE @nome";
 
                 using (var command = new SqlCommand(commandText, connection))
                 {
@@ -28,7 +28,7 @@ namespace BackEndGamesTito.API.Repositories
                         {
                             return new Jogos
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Id = reader.GetInt32(reader.GetOrdinal("JogosId")),
                                 Nome = reader.IsDBNull(reader.GetOrdinal("Nome")) ? string.Empty : reader.GetString(reader.GetOrdinal("Nome")),
                                 Descricao = reader.IsDBNull(reader.GetOrdinal("Descricao")) ? string.Empty : reader.GetString(reader.GetOrdinal("Descricao")),
                                 Preco = reader.IsDBNull(reader.GetOrdinal("Preco")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Preco"))),
@@ -56,7 +56,7 @@ namespace BackEndGamesTito.API.Repositories
                         {
                             games.Add(new Jogos
                             {
-                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    Id = reader.GetInt32(reader.GetOrdinal("JogosId")),
                                     Nome = reader.IsDBNull(reader.GetOrdinal("Nome")) ? string.Empty : reader.GetString(reader.GetOrdinal("Nome")),
                                     Descricao = reader.IsDBNull(reader.GetOrdinal("Descricao")) ? string.Empty : reader.GetString(reader.GetOrdinal("Descricao")),
                                     Preco = reader.IsDBNull(reader.GetOrdinal("Preco")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Preco"))),
