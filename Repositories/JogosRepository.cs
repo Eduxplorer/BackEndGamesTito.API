@@ -12,6 +12,9 @@ namespace BackEndGamesTito.API.Repositories
             _connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new ArgumentNullException("String de conexão 'DefaultConnection' não encontrada");
         }
+
+
+        // Métodos de visualização de jogos
         public async Task<Jogos?> searchGame(string nome)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -69,5 +72,33 @@ namespace BackEndGamesTito.API.Repositories
             }
             return games;
         }
-    }
+
+        // Métodos de criação
+
+        public async Task<Jogos> createGames(string nome, string descricao, decimal preco, DateTime lancamento)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                var commandText = @"INSERT INTO Jogos (Nome, Descricao, Preco, Lancamento) 
+                                    VALUES (@nome, @descricao, @preco, @lancamento);
+                                    SELECT SCOPE_IDENTITY();";
+                using (var command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("@nome", nome);
+                    command.Parameters.AddWithValue("@descricao", descricao);
+                    command.Parameters.AddWithValue("@preco", preco);
+                    command.Parameters.AddWithValue("@lancamento", lancamento);
+                    var insertedId = Convert.ToInt32(await command.ExecuteScalarAsync());
+                    return new Jogos
+                    {
+                        Id = insertedId,
+                        Nome = nome,
+                        Descricao = descricao,
+                        Preco = preco,
+                        Lancamento = lancamento
+                    };
+                }
+            }
+        }
 }
