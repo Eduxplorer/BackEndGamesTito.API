@@ -59,12 +59,12 @@ namespace BackEndGamesTito.API.Repositories
                         {
                             games.Add(new Jogos
                             {
-                                    Id = reader.GetInt32(reader.GetOrdinal("JogosId")),
-                                    Nome = reader.IsDBNull(reader.GetOrdinal("Nome")) ? string.Empty : reader.GetString(reader.GetOrdinal("Nome")),
-                                    Descricao = reader.IsDBNull(reader.GetOrdinal("Descricao")) ? string.Empty : reader.GetString(reader.GetOrdinal("Descricao")),
-                                    Preco = reader.IsDBNull(reader.GetOrdinal("Preco")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Preco"))),
-                                    Avaliacao = reader.IsDBNull(reader.GetOrdinal("Avaliacao")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Avaliacao"))),
-                                    Lancamento = reader.IsDBNull(reader.GetOrdinal("Lancamento")) ? DateTime.MinValue : Convert.ToDateTime(reader.GetValue(reader.GetOrdinal("Lancamento")))
+                                Id = reader.GetInt32(reader.GetOrdinal("JogosId")),
+                                Nome = reader.IsDBNull(reader.GetOrdinal("Nome")) ? string.Empty : reader.GetString(reader.GetOrdinal("Nome")),
+                                Descricao = reader.IsDBNull(reader.GetOrdinal("Descricao")) ? string.Empty : reader.GetString(reader.GetOrdinal("Descricao")),
+                                Preco = reader.IsDBNull(reader.GetOrdinal("Preco")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Preco"))),
+                                Avaliacao = reader.IsDBNull(reader.GetOrdinal("Avaliacao")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Avaliacao"))),
+                                Lancamento = reader.IsDBNull(reader.GetOrdinal("Lancamento")) ? DateTime.MinValue : Convert.ToDateTime(reader.GetValue(reader.GetOrdinal("Lancamento")))
                             });
                         }
                     }
@@ -101,4 +101,6 @@ namespace BackEndGamesTito.API.Repositories
                 }
             }
         }
+    }
+
 }
