@@ -42,7 +42,7 @@ if (app.Environment.IsDevelopment())
 // Habilita o CORS antes do mapeamento dos controllers
 app.UseCors("GamesTitoPolicy"); // ativa a politica antes de tudo
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 // Importante: Habilita o uso de arquivos estáticos (para a sua página de reset-password)
 app.UseStaticFiles();
