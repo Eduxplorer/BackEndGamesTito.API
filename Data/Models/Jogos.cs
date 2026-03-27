@@ -8,5 +8,6 @@
         public decimal Avaliacao { get; set; }
         public decimal Preco { get; set; }
         public DateTime Lancamento { get; set; }
+        public string Imagem { get; set; } = string.Empty;
     }
 }

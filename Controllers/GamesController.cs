@@ -25,7 +25,7 @@ namespace BackEndGamesTito.API.Controllers
 {
     // Criando as rotas para o controller dos jogos
     [ApiController]
-    [Route("api/[controller]")] // controle de rotas é o próprio endpoint
+    [Route("api/games")] // controle de rotas: usar rota em lowercase /api/games
     public class GamesController : ControllerBase
     {
         private readonly JogosRepository _jogosRepository;
@@ -33,31 +33,7 @@ namespace BackEndGamesTito.API.Controllers
         {
             _jogosRepository = jogosRepository;
         }
-        [HttpGet("game")]
-        public async Task<ActionResult<Jogos>> SearchGame([FromQuery(Name = "nome")] string? nome)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(nome))
-                {
-                    return BadRequest(new { message = "O parâmetro 'nome' é obrigatório na query string. Ex.: /api/games/game?nome=NomeDoJogo" });
-                }
-                var game = await _jogosRepository.searchGame(nome);
-                if (game == null)
-                {
-                    return NotFound(new { message = "Nenhum jogo encontrado." });
-                }
-                return Ok(game);
-            }
-            catch (Exception ex)
-            {
-                // Logar o erro para análise futura
-                Console.Error.WriteLine($"Erro ao buscar jogo: {ex}");
-                return StatusCode(500, new { message = "Ocorreu um erro ao buscar o jogo.", detalhe = ex.Message });
-            }
-        }
-
-        [HttpGet("games")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<Jogos>>> GetJogos()
         {
             try
@@ -70,6 +46,26 @@ namespace BackEndGamesTito.API.Controllers
                 // Logar o erro para análise futura
                 Console.Error.WriteLine($"Erro ao buscar jogos: {ex}");
                 return StatusCode(500, new { message = "Ocorreu um erro ao buscar os jogos.", detalhe = ex.Message });
+            }
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Jogos>> GetGameById(int id)
+        {
+            try
+            {
+                var game = await _jogosRepository.searchGame(id);
+                if (game == null)
+                {
+                    return NotFound(new { message = "Nenhum jogo encontrado." });
+                }
+                return Ok(game);
+            }
+            catch (Exception ex)
+            {
+                // Logar o erro para análise futura
+                Console.Error.WriteLine($"Erro ao buscar jogo: {ex}");
+                return StatusCode(500, new { message = "Ocorreu um erro ao buscar o jogo.", detalhe = ex.Message });
             }
         }
 

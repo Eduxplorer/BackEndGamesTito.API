@@ -15,16 +15,16 @@ namespace BackEndGamesTito.API.Repositories
 
 
         // Métodos de visualização de jogos
-        public async Task<Jogos?> searchGame(string nome)
+        public async Task<Jogos?> searchGame(int JogosId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var commandText = @"SELECT TOP 1 * FROM Jogos WHERE nome LIKE @nome";
+                var commandText = @"SELECT TOP 1 * FROM Jogos WHERE JogosId = @JogosId";
 
                 using (var command = new SqlCommand(commandText, connection))
                 {
-                    command.Parameters.AddWithValue("@nome", nome);
+                    command.Parameters.AddWithValue("@JogosId", JogosId);
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         if (await reader.ReadAsync())
@@ -34,8 +34,10 @@ namespace BackEndGamesTito.API.Repositories
                                 Id = reader.GetInt32(reader.GetOrdinal("JogosId")),
                                 Nome = reader.IsDBNull(reader.GetOrdinal("Nome")) ? string.Empty : reader.GetString(reader.GetOrdinal("Nome")),
                                 Descricao = reader.IsDBNull(reader.GetOrdinal("Descricao")) ? string.Empty : reader.GetString(reader.GetOrdinal("Descricao")),
+                                Avaliacao = reader.IsDBNull(reader.GetOrdinal("Avaliacao")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Avaliacao"))),
                                 Preco = reader.IsDBNull(reader.GetOrdinal("Preco")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Preco"))),
-                                Lancamento = reader.IsDBNull(reader.GetOrdinal("Lancamento")) ? DateTime.MinValue : Convert.ToDateTime(reader.GetValue(reader.GetOrdinal("Lancamento")))
+                                Lancamento = reader.IsDBNull(reader.GetOrdinal("Lancamento")) ? DateTime.MinValue : Convert.ToDateTime(reader.GetValue(reader.GetOrdinal("Lancamento"))),
+                                Imagem = reader.IsDBNull(reader.GetOrdinal("Imagem")) ? string.Empty : reader.GetString(reader.GetOrdinal("Imagem"))
                             };
                         }
                     }
@@ -64,7 +66,8 @@ namespace BackEndGamesTito.API.Repositories
                                 Descricao = reader.IsDBNull(reader.GetOrdinal("Descricao")) ? string.Empty : reader.GetString(reader.GetOrdinal("Descricao")),
                                 Preco = reader.IsDBNull(reader.GetOrdinal("Preco")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Preco"))),
                                 Avaliacao = reader.IsDBNull(reader.GetOrdinal("Avaliacao")) ? 0m : Convert.ToDecimal(reader.GetValue(reader.GetOrdinal("Avaliacao"))),
-                                Lancamento = reader.IsDBNull(reader.GetOrdinal("Lancamento")) ? DateTime.MinValue : Convert.ToDateTime(reader.GetValue(reader.GetOrdinal("Lancamento")))
+                                Lancamento = reader.IsDBNull(reader.GetOrdinal("Lancamento")) ? DateTime.MinValue : Convert.ToDateTime(reader.GetValue(reader.GetOrdinal("Lancamento"))),
+                                Imagem = reader.IsDBNull(reader.GetOrdinal("Imagem")) ? string.Empty : reader.GetString(reader.GetOrdinal("Imagem"))
                             });
                         }
                     }
@@ -96,7 +99,8 @@ namespace BackEndGamesTito.API.Repositories
                         Nome = nome,
                         Descricao = descricao,
                         Preco = preco,
-                        Lancamento = lancamento
+                        Lancamento = lancamento,
+                        Imagem = string.Empty
                     };
                 }
             }
